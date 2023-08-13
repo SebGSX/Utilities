@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-stryker": {
+      "version": "3.9.2",
+      "commands": [
+        "dotnet-stryker"
+      ]
+    },
+    "dotnet-coverage": {
+      "version": "17.7.3",
+      "commands": [
+        "dotnet-coverage"
+      ]
+    },
+    "microsoft.coyote.cli": {
+      "version": "1.7.9",
+      "commands": [
+        "coyote"
+      ]
+    }
+  }
+}

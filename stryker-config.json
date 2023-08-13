@@ -1,0 +1,24 @@
+﻿{
+  "stryker-config": {
+    "ignore-methods": [
+      "logger.*",
+      "*Logger.*",
+      "*Lock.Enter",
+      "*Lock.Exit",
+      "*Log",
+      "event.Reset*",
+      "*Event.Reset*",
+      "event.Set*",
+      "*Event.Set*",
+      "event.Wait*",
+      "*Event.Wait*",
+      "*Semaphore.Release*",
+      "*Semaphore.Wait*",
+      "task.Wait*",
+      "*Task.Wait*",
+      "*Thread.Join",
+      "*.ThrowIfCancellationRequested",
+      "Debug.Assert*"
+    ]
+  }
+}
