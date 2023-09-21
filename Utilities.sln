@@ -21,6 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizedInternals.Tests", "tests\OptimizedInternals.Tests\OptimizedInternals.Tests.csproj", "{41D3114A-30FC-4266-A61B-ECDEE6CD2B74}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prompt-engineering", "prompt-engineering", "{AD2A7C2F-6C57-41F4-A131-E3C047854842}"
+	ProjectSection(SolutionItems) = preProject
+		prompt-engineering\pull-request-review.md = prompt-engineering\pull-request-review.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
