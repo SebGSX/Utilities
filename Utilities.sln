@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prompt-engineering", "prompt-engineering", "{AD2A7C2F-6C57-41F4-A131-E3C047854842}"
 	ProjectSection(SolutionItems) = preProject
 		prompt-engineering\pull-request-review.md = prompt-engineering\pull-request-review.md
+		prompt-engineering\work-item-review.md = prompt-engineering\work-item-review.md
 	EndProjectSection
 EndProject
 Global
