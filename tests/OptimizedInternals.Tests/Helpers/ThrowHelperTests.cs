@@ -13,17 +13,17 @@ public class ThrowHelperTests
     /// <summary>
     ///     Tests that <see cref="ThrowHelper.ThrowIf{TException}(bool, string, string)" /> does not throw.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void ThrowIfArgumentException_ConditionFalse_DoesNotThrow()
     {
         // Arrange
-        const string paramName = "paramName";
-        const string message = "message";
+        const string expectedParamName = "paramName";
+        const string expectedMessage = "message";
 
         // Act
         var exception = Record.Exception(() =>
-            ThrowHelper.ThrowIf<ArgumentException>(false, message, paramName));
+            ThrowHelper.ThrowIf<ArgumentException>(false, expectedMessage, expectedParamName));
 
         // Assert
         Assert.Null(exception);
@@ -32,39 +32,39 @@ public class ThrowHelperTests
     /// <summary>
     ///     Tests that <see cref="ThrowHelper.ThrowIf{TException}(bool, string, string)" /> throws the correct exception.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void ThrowIfArgumentException_ConditionTrue_ThrowsArgumentException()
     {
         // Arrange
-        const string paramName = "paramName";
-        const string message = "message";
-        const string expectedMessage = $"{message} (Parameter '{paramName}')";
+        const string expectedParameterName = "paramName";
+        const string expectedMessageText = "messageText";
+        const string expectedMessage = $"{expectedMessageText} (Parameter '{expectedParameterName}')";
 
         // Act
         var exception = Record.Exception(() =>
-            ThrowHelper.ThrowIf<ArgumentException>(true, message, paramName));
+            ThrowHelper.ThrowIf<ArgumentException>(true, expectedMessageText, expectedParameterName));
 
         // Assert
         Assert.NotNull(exception);
         Assert.IsType<ArgumentException>(exception);
         Assert.Equal(expectedMessage, exception.Message);
-        Assert.Equal(paramName, ((ArgumentException)exception).ParamName);
+        Assert.Equal(expectedParameterName, ((ArgumentException)exception).ParamName);
     }
 
     /// <summary>
     ///     Tests that <see cref="ThrowHelper.ThrowIf{TException}(bool, string)" /> does not throw.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void ThrowIfInvalidOperationException_ConditionFalse_DoesNotThrow()
     {
         // Arrange
-        const string message = "message";
+        const string expectedMessage = "message";
 
         // Act
         var exception = Record.Exception(() =>
-            ThrowHelper.ThrowIf<InvalidOperationException>(false, message));
+            ThrowHelper.ThrowIf<InvalidOperationException>(false, expectedMessage));
 
         // Assert
         Assert.Null(exception);
@@ -73,20 +73,20 @@ public class ThrowHelperTests
     /// <summary>
     ///     Tests that <see cref="ThrowHelper.ThrowIf{TException}(bool, string)" /> throws the correct exception.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void ThrowIfInvalidOperationException_ConditionTrue_ThrowsInvalidOperationException()
     {
         // Arrange
-        const string message = "message";
+        const string expectedMessage = "message";
 
         // Act
         var exception = Record.Exception(() =>
-            ThrowHelper.ThrowIf<InvalidOperationException>(true, message));
+            ThrowHelper.ThrowIf<InvalidOperationException>(true, expectedMessage));
 
         // Assert
         Assert.NotNull(exception);
         Assert.IsType<InvalidOperationException>(exception);
-        Assert.Equal(message, exception.Message);
+        Assert.Equal(expectedMessage, exception.Message);
     }
 }

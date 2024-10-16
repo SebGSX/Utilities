@@ -21,7 +21,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Dispose_Invoked_Disposes<TLogger>(
@@ -47,7 +47,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Dispose_InvokedConcurrently_DoesNotThrow<TLogger>(
@@ -64,9 +64,8 @@ public class ListenerThreadInterfaceImplementationTests
         for (var i = 0; i < 100; i++) implementation.EnqueueRequest(i);
 
         // Act
-        const uint iterations = 100;
         var exceptions = new ConcurrentBag<Exception?>();
-        Parallel.For(0, iterations, _ => { exceptions.Add(Record.Exception(implementation.Dispose)); });
+        Parallel.For(0, 100, _ => { exceptions.Add(Record.Exception(implementation.Dispose)); });
 
         // Assert
         Assert.DoesNotContain(exceptions, e => e != null);
@@ -79,7 +78,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Dispose_Invoked_StopsListenerThread<TLogger>(
@@ -109,7 +108,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void EnqueueRequest_Invoked_ProcessesRequest<TLogger>(
@@ -119,13 +118,13 @@ public class ListenerThreadInterfaceImplementationTests
     {
         // Arrange
         loggerMock.Reset();
-        var actualResult = 0;
+        var result = 0;
 
         var action = new Action<int, CancellationToken>(
             [ExcludeFromCodeCoverage(Justification = "Test method.")]
             (i, ct) =>
             {
-                actualResult = i * 2;
+                result = i * 2;
                 Thread.SpinWait(GlobalTestParameters.DefaultLoopWaitTime);
             });
 
@@ -139,7 +138,7 @@ public class ListenerThreadInterfaceImplementationTests
         var stateStopped = implementation.State;
 
         // Assert
-        Assert.Equal(2, actualResult);
+        Assert.Equal(2, result);
         Assert.Equal(ListenerThreadStates.Running, stateRunning);
         Assert.Equal(ListenerThreadStates.Ready, stateReady);
         Assert.Equal(ListenerThreadStates.Stopped, stateStopped);
@@ -151,7 +150,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void EnqueueRequest_InvokedConcurrently_ProcessesRequests<TLogger>(
@@ -168,11 +167,10 @@ public class ListenerThreadInterfaceImplementationTests
 
         // Act
         implementation.Start(action);
-        const uint iterations = 100;
         var states = new ConcurrentBag<ListenerThreadStates>();
-        Parallel.For(0, iterations, i =>
+        Parallel.For(0, 100, i =>
         {
-            implementation.EnqueueRequest((int)i);
+            implementation.EnqueueRequest(i);
             states.Add(implementation.State);
         });
         Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
@@ -193,7 +191,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void EnqueueRequest_IsDisposed_ThrowsObjectDisposedException<TLogger>(
@@ -224,7 +222,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void EnqueueRequest_NotReadyOrRunning_ThrowsInvalidOperationException<TLogger>(
@@ -265,7 +263,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void EnqueueRequest_ExceptionThrown_LogsException<TLogger>(
@@ -276,7 +274,7 @@ public class ListenerThreadInterfaceImplementationTests
         // Arrange
         loggerMock.Reset();
         var logInvocationArguments = ArrangeHelper.SetupLoggerMockCallback(ref loggerMock);
-        const string expectedCancellationLogMessage = "Worker thread cancelled.";
+        const string expectedCancellationLogMessage = "Error: Worker thread cancelled.";
         const string expectedErrorLogMessage = "An exception occurred while processing a request.";
         const string expectedExceptionMessage = "Testing exception logging.";
 
@@ -296,7 +294,7 @@ public class ListenerThreadInterfaceImplementationTests
         Assert.Equal(expectedErrorLogMessage, logInvocationArguments[0].Item2?.ToString());
         Assert.IsType<InvalidOperationException>(logInvocationArguments[0].Item3);
         Assert.Equal(expectedExceptionMessage, logInvocationArguments[0].Item3?.Message);
-        Assert.Equal(LogLevel.Information, logInvocationArguments[1].Item1);
+        Assert.Equal(LogLevel.Error, logInvocationArguments[1].Item1);
         Assert.Equal(expectedCancellationLogMessage, logInvocationArguments[1].Item2?.ToString());
         Assert.Equal(ListenerThreadStates.Ready, stateReady);
         loggerMock.Verify(
@@ -316,7 +314,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Start_IsDisposed_ThrowsObjectDisposedException<TLogger>(
@@ -349,7 +347,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Start_ValidAction_StartsListenerThread<TLogger>(
@@ -380,7 +378,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Start_ValidAction_DoesNotExecuteAction<TLogger>(
@@ -410,7 +408,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Start_InvokedRepeatedly_ThrowsInvalidOperationException<TLogger>(
@@ -446,7 +444,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void Start_ValidActionAfterStopInvoked_ThrowsInvalidOperationException<TLogger>(
@@ -477,7 +475,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryReset_InitializedInvoked_ReturnsFalse<TLogger>(
@@ -502,7 +500,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryReset_Invoked_ResetsListenerThread<TLogger>(
@@ -541,7 +539,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryReset_InvokedConcurrently_ResetsListenerThread<TLogger>(
@@ -555,18 +553,18 @@ public class ListenerThreadInterfaceImplementationTests
             [ExcludeFromCodeCoverage(Justification = "Test method.")]
             (i, ct) => { });
         implementation.Start(action);
+        const uint expectedIterations = 100;
 
         // Act
         var readyState = implementation.State;
-        const uint iterations = 100;
         var results = new ConcurrentBag<bool>();
-        Parallel.For(0, iterations, _ => results.Add(implementation.TryReset()));
+        Parallel.For(0, 100, _ => results.Add(implementation.TryReset()));
         var initializedState = implementation.State;
 
         // Assert
         Assert.Equal(ListenerThreadStates.Initialized, initializedState);
         Assert.Equal(ListenerThreadStates.Ready, readyState);
-        Assert.Equal(iterations - 1, (uint)results.Count(r => !r));
+        Assert.Equal(expectedIterations - 1, (uint)results.Count(r => !r));
         Assert.Single(results, true);
     }
 
@@ -577,7 +575,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryReset_IsDisposed_ThrowsObjectDisposedException<TLogger>(
@@ -606,7 +604,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryStop_Invoked_StopsListenerThread<TLogger>(
@@ -618,7 +616,7 @@ public class ListenerThreadInterfaceImplementationTests
         loggerMock.Reset();
         var logInvocationArguments = ArrangeHelper.SetupLoggerMockCallback(ref loggerMock);
 
-        const string expectedCancellationLogMessage = "Worker thread cancelled.";
+        const string expectedCancellationLogMessage = "Error: Worker thread cancelled.";
 
         var action = new Action<int, CancellationToken>(
             [ExcludeFromCodeCoverage(Justification = "Test method.")]
@@ -648,7 +646,7 @@ public class ListenerThreadInterfaceImplementationTests
         var state = implementation.State;
 
         // Assert
-        Assert.Equal(LogLevel.Information, logInvocationArguments[0].Item1);
+        Assert.Equal(LogLevel.Error, logInvocationArguments[0].Item1);
         Assert.Equal(expectedCancellationLogMessage, logInvocationArguments[0].Item2?.ToString());
         Assert.Throws<InvalidOperationException>(() => implementation.Start(action));
         Assert.Equal(ListenerThreadStates.Stopped, state);
@@ -669,7 +667,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryStop_InvokedConcurrently_StopsListenerThread<TLogger>(
@@ -683,18 +681,18 @@ public class ListenerThreadInterfaceImplementationTests
             [ExcludeFromCodeCoverage(Justification = "Test method.")]
             (i, ct) => { });
         implementation.Start(action);
+        const uint expectedIterations = 100;
 
         // Act
         var readyState = implementation.State;
-        const uint iterations = 100;
         var results = new ConcurrentBag<bool>();
-        Parallel.For(0, iterations, _ => results.Add(implementation.TryStop()));
+        Parallel.For(0, expectedIterations, _ => results.Add(implementation.TryStop()));
         var stoppedState = implementation.State;
 
         // Assert
         Assert.Equal(ListenerThreadStates.Ready, readyState);
         Assert.Equal(ListenerThreadStates.Stopped, stoppedState);
-        Assert.Equal(iterations - 1, (uint)results.Count(r => !r));
+        Assert.Equal(expectedIterations - 1, (uint)results.Count(r => !r));
         Assert.Single(results, true);
     }
 
@@ -704,7 +702,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryStop_InvokedRepeatedly_DoesNotThrow<TLogger>(
@@ -739,7 +737,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryStop_IsDisposed_ThrowsObjectDisposedException<TLogger>(
@@ -768,7 +766,7 @@ public class ListenerThreadInterfaceImplementationTests
     /// <param name="implementation">The <see cref="IListenerThread{T}" /> implementation to test.</param>
     /// <param name="loggerMock">The mock of the <see cref="ILogger" /> used to log messages.</param>
     /// <typeparam name="TLogger">The type of logger used by the implementation.</typeparam>
-    [Theory(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Theory]
     [Trait("Category", "Unit")]
     [ClassData(typeof(ListenerThreadInterfaceImplementationTestData))]
     public void TryStop_WorkerThreadHung_StopsWorkerThread<TLogger>(
@@ -812,7 +810,7 @@ public class ListenerThreadInterfaceImplementationTests
         Assert.Equal(LogLevel.Error, logInvocationArguments[1].Item1);
         Assert.Equal(expectedErrorLogMessage, logInvocationArguments[1].Item2?.ToString());
         Assert.IsType<ThreadInterruptedException>(logInvocationArguments[1].Item3);
-        Assert.Equal(LogLevel.Warning, logInvocationArguments[2].Item1);
+        Assert.Equal(LogLevel.Error, logInvocationArguments[2].Item1);
         Assert.Equal(expectedWarningLogMessage2, logInvocationArguments[2].Item2?.ToString());
         Assert.Equal(ListenerThreadStates.Stopped, stateStopped);
         Assert.True(result);

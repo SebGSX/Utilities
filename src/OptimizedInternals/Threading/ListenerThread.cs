@@ -82,6 +82,7 @@ public sealed class ListenerThread<T> : IListenerThread<T>
             // Stryker disable once all
             _dataReadyEvent.Dispose();
             SetState(ListenerThreadStates.Disposed);
+            _cancellationTokenSource.Dispose();
             // Stryker disable once all
             GC.SuppressFinalize(this);
         }
@@ -302,7 +303,7 @@ public sealed class ListenerThread<T> : IListenerThread<T>
         _workerThread.Interrupt();
         _workerThread.Join();
 
-        _logger.LogWarning("Worker thread interrupted.");
+        _logger.LogError("Worker thread interrupted.");
     }
 
     private void WorkerThreadDelegate(CancellationToken cancellationToken)
@@ -328,9 +329,9 @@ public sealed class ListenerThread<T> : IListenerThread<T>
          * the method swallows exceptions and logs them. Any exception that occurs at this level is unexpected and is
          * allowed to propagate.
          */
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _logger.LogInformation("Worker thread cancelled.");
+            _logger.LogError(ex, "Error: Worker thread cancelled.");
         }
     }
 

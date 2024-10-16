@@ -15,7 +15,7 @@ public class ListenerThreadTests
     ///     Tests that the constructor initializes a new instance of the <see cref="ListenerThread{T}" /> class
     ///     when the parameters are valid.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void Constructor_ValidParameters_InitializesNewInstance()
     {

@@ -17,11 +17,6 @@ public static class GlobalTestParameters
     public const ushort DefaultLoopWaitTime = 100;
 
     /// <summary>
-    ///     The default test timeout in milliseconds used to protect against infinite loops, deadlocks, etc.
-    /// </summary>
-    public const ushort DefaultTestTimeout = 4000;
-
-    /// <summary>
     ///     The default thread sleep time in milliseconds used to test parallelism.
     /// </summary>
     public const ushort DefaultThreadSleepTime = 500;

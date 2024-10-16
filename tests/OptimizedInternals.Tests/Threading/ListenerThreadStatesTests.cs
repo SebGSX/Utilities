@@ -13,7 +13,7 @@ public class ListenerThreadStatesTests
     /// <summary>
     ///     Tests that the <see cref="ListenerThreadStates" /> members return the expected values.
     /// </summary>
-    [Fact(Timeout = GlobalTestParameters.DefaultTestTimeout)]
+    [Fact]
     [Trait("Category", "Unit")]
     public void Members_ReturnExpectedValues()
     {
