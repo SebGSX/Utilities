@@ -34,7 +34,9 @@ public class ListenerThreadInterfaceImplementationTests
 
         // Act
         implementation.Dispose();
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime * 2);
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Disposed,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
 
         // Assert
         Assert.Equal(ListenerThreadStates.Disposed, implementation.State);
@@ -96,7 +98,9 @@ public class ListenerThreadInterfaceImplementationTests
 
         // Act
         implementation.Dispose();
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime * 2);
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Disposed,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
 
         // Assert
         Assert.Equal(ListenerThreadStates.Disposed, implementation.State);
@@ -131,17 +135,27 @@ public class ListenerThreadInterfaceImplementationTests
         // Act
         implementation.Start(action);
         implementation.EnqueueRequest(1);
-        var stateRunning = implementation.State;
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
+
+        var stateRunningActivated = SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Running,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
+        
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Ready,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
         var stateReady = implementation.State;
+        
         implementation.TryStop();
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Stopped,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
         var stateStopped = implementation.State;
 
         // Assert
         Assert.Equal(2, result);
-        Assert.Equal(ListenerThreadStates.Running, stateRunning);
         Assert.Equal(ListenerThreadStates.Ready, stateReady);
         Assert.Equal(ListenerThreadStates.Stopped, stateStopped);
+        Assert.True(stateRunningActivated);
     }
 
     /// <summary>
@@ -168,14 +182,21 @@ public class ListenerThreadInterfaceImplementationTests
         // Act
         implementation.Start(action);
         var states = new ConcurrentBag<ListenerThreadStates>();
-        Parallel.For(0, 100, i =>
+        Parallel.For(0, 127, i =>
         {
             implementation.EnqueueRequest(i);
             states.Add(implementation.State);
         });
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
+        
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Ready,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
         var stateReady = implementation.State;
+        
         implementation.TryStop();
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Stopped,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
         var stateStopped = implementation.State;
 
         // Assert
@@ -285,9 +306,16 @@ public class ListenerThreadInterfaceImplementationTests
         // Act
         implementation.Start(action);
         implementation.EnqueueRequest(1);
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
+        
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Ready,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
         var stateReady = implementation.State;
+        
         implementation.TryStop();
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Stopped,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
 
         // Assert
         Assert.Equal(LogLevel.Error, logInvocationArguments[0].Item1);
@@ -639,7 +667,9 @@ public class ListenerThreadInterfaceImplementationTests
             });
         implementation.Start(action);
         implementation.EnqueueRequest(1);
-        Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
+        SpinWait.SpinUntil(
+            () => implementation.State == ListenerThreadStates.Running,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
 
         // Act
         implementation.TryStop();
@@ -789,8 +819,12 @@ public class ListenerThreadInterfaceImplementationTests
             (i, ct) =>
             {
                 actionInvoked = true;
-                // Simulate a hung thread.
-                Thread.Sleep(IListenerThread<int>.ThreadJoinTimeout * 100);
+                /* Simulate a hung thread:
+                 * The parameter i will never equal 5, which is why the timeout is vital to avoid an infinite loop.
+                 */
+                SpinWait.SpinUntil(
+                    () => i.Equals(5),
+                    GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds * 10);
             });
 
         // Act
@@ -799,7 +833,10 @@ public class ListenerThreadInterfaceImplementationTests
         implementation.EnqueueRequest(2);
         implementation.EnqueueRequest(3);
         implementation.EnqueueRequest(4);
-        while (!actionInvoked) Thread.Sleep(GlobalTestParameters.DefaultThreadSleepTime);
+        SpinWait.SpinUntil(
+            () => actionInvoked,
+            GlobalTestParameters.DefaultThreadSpinWaitTimeoutMilliseconds);
+        
         var result = implementation.TryStop();
         var stateStopped = implementation.State;
 
